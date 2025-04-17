@@ -1,0 +1,295 @@
+/* --- Minimalist Dark Theme CSS --- */
+:root {
+    /* Color Palette - Inspired by reference image */
+    --bg-main: #0d0d0d;           /* Very dark background */
+    --bg-elements: #1c1c1e;      /* Slightly lighter for subtle elements if needed */
+    --bg-hover: #2c2c2e;         /* Hover background for lists/buttons */
+    --bg-active-item: #3b82f6;   /* Accent color for playing item (kept blue for now) */
+
+    --text-primary: #ffffff;     /* Primary white text */
+    --text-secondary: #8e8e93;   /* Muted gray for time, artist, labels */
+    --text-on-active: #ffffff;   /* Text color on active/accent background */
+
+    --accent-primary: #ffffff;   /* White for slider thumbs/progress fill */
+    --accent-secondary: #e5e5ea; /* Slightly off-white for hover states */
+    --icon-color: #a0a0a5;       /* Default color for icons */
+    --icon-hover-color: #ffffff; /* Icon color on hover */
+
+    --border-color: #3a3a3c;     /* Subtle borders if needed */
+
+    /* Layout & Style */
+    --border-radius-main: 16px; /* Larger radius for player card */
+    --border-radius-inner: 8px;
+    --transition-speed: 0.15s;
+    --transition-func: ease;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Roboto', 'Helvetica Neue', sans-serif; /* iOS style fonts */
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    min-height: 100vh;
+}
+
+h1 {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+/* Hidden file input */
+#fileInput { display: none; }
+
+/* Main Layout Container */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    max-width: 900px; /* Adjusted max-width */
+    justify-content: center;
+}
+
+/* Player & Playlist Cards */
+.player, .playlist-container {
+    background-color: var(--bg-main); /* Blend with background */
+    border-radius: var(--border-radius-main);
+    padding: 20px;
+    /* No border or shadow for flat look */
+    display: flex;
+    flex-direction: column;
+}
+
+.player {
+    width: 100%;
+    max-width: 350px; /* Adjusted width */
+    align-items: center;
+    gap: 15px;
+}
+
+.playlist-container {
+    width: 100%;
+    max-width: 450px; /* Adjusted width */
+    flex-grow: 1;
+    height: 480px; /* Keep fixed height */
+    overflow-y: auto;
+    gap: 10px;
+    background-color: var(--bg-elements); /* Slight contrast for playlist bg */
+}
+
+/* Custom scrollbar for playlist */
+.playlist-container::-webkit-scrollbar {
+    width: 6px;
+}
+.playlist-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.playlist-container::-webkit-scrollbar-thumb {
+    background-color: var(--bg-hover);
+    border-radius: 3px;
+}
+
+/* Album Art */
+#albumArtContainer {
+    width: 100%; /* Fill width */
+    max-width: 250px; /* Max size */
+    aspect-ratio: 1 / 1; /* Make it square */
+    background-color: var(--bg-elements); /* Placeholder bg */
+    border-radius: var(--border-radius-inner);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 10px; /* Space below art */
+}
+#albumArt {
+    width: 100%; height: 100%; object-fit: cover; display: none;
+}
+#artPlaceholder {
+    width: 50px; height: 50px; color: var(--text-secondary); display: inline-block;
+}
+
+/* Track Info */
+#trackInfo { text-align: center; width: 100%; margin-bottom: 10px;}
+#trackTitle {
+    font-weight: 600; display: block; font-size: 1.1em; margin-bottom: 4px; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#trackArtistAlbum {
+    font-size: 0.9em; color: var(--text-secondary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Progress Bar & Time */
+.progress-container { width: 100%; display: flex; align-items: center; gap: 10px; }
+.time-display { font-size: 0.75em; white-space: nowrap; color: var(--text-secondary); font-weight: 400; }
+
+/* Sliders (Progress & Volume) - Minimal Style */
+input[type="range"] {
+    flex-grow: 1;
+    appearance: none; -webkit-appearance: none;
+    width: 100%;
+    height: 4px; /* Thin track */
+    background: var(--bg-elements); /* Track background */
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+/* JS sets the fill via background gradient */
+#progressBar { background: var(--bg-elements); }
+#volumeSlider { background: var(--bg-elements); height: 3px; border-radius: 1.5px; }
+
+/* Thumb Styles - Small white dot */
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none; -webkit-appearance: none;
+    width: 12px; height: 12px;
+    background: var(--accent-primary); /* White thumb */
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: none; /* No shadow */
+    margin-top: -4px; /* Center thumb on track */
+}
+input[type="range"]::-moz-range-thumb {
+    width: 12px; height: 12px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: none;
+}
+#volumeSlider::-webkit-slider-thumb { width: 10px; height: 10px; margin-top: -3.5px;}
+#volumeSlider::-moz-range-thumb { width: 10px; height: 10px;}
+
+
+/* Playback Controls */
+.controls {
+    display: flex; align-items: center; justify-content: space-between; /* Space out controls */
+    gap: 10px;
+    width: 100%;
+    padding: 15px 0 5px 0; /* Padding top/bottom */
+}
+.control-button {
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    width: 44px; height: 44px; /* Standard size */
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--icon-color);
+    transition: background-color var(--transition-speed) var(--transition-func), color var(--transition-speed) var(--transition-func);
+}
+.control-button svg { width: 20px; height: 20px; display: block; fill: currentColor; }
+
+.control-button:hover {
+    color: var(--icon-hover-color);
+    background-color: var(--bg-hover); /* Subtle hover */
+}
+.control-button:active {
+     background-color: var(--bg-elements); /* Slightly different active bg */
+}
+
+/* Play/Pause Button Specifics */
+.control-button.large {
+    width: 56px; height: 56px;
+    background-color: var(--bg-elements); /* Slight background differentiation */
+    color: var(--text-primary); /* White icon */
+}
+.control-button.large svg { width: 28px; height: 28px; }
+.control-button.large:hover {
+    background-color: var(--bg-hover);
+}
+.control-button.large:active {
+    background-color: var(--bg-elements);
+}
+/* Play/Pause icon colors don't need specific override if parent is white */
+
+
+/* File Input Button as Icon Button */
+#fileInputLabel.file-button {
+    width: 44px; height: 44px; /* Match other buttons */
+    padding: 0; /* Remove padding */
+    order: -1; /* Position it first visually if desired */
+}
+#fileInputLabel.file-button svg {
+    width: 22px; height: 22px; /* Adjust icon size */
+}
+
+/* Volume Control Popover/Container */
+.volume-control-wrapper {
+    position: relative; /* Needed for absolute positioning of slider */
+    order: 1; /* Position it last visually if desired */
+}
+.volume-slider-container {
+    position: absolute;
+    bottom: calc(100% + 10px); /* Position above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--bg-hover);
+    padding: 10px 15px;
+    border-radius: var(--border-radius-inner);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 150px; /* Width of the popover */
+    z-index: 10;
+}
+.volume-slider-container.hidden {
+    display: none;
+}
+#volumeSlider {
+    width: 100%; /* Slider takes full width of container */
+}
+
+
+/* Playlist Styling */
+.playlist-container h3 {
+    margin-bottom: 10px;
+    text-align: left; /* Align left */
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.9em;
+    padding: 0 10px; /* Padding */
+    border-bottom: none; /* Remove border */
+}
+#fileList { list-style: none; }
+#fileList li {
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500; /* Slightly bolder text */
+    border-radius: var(--border-radius-inner);
+    margin-bottom: 2px; /* Minimal gap */
+    transition: background-color var(--transition-speed) var(--transition-func), color var(--transition-speed) var(--transition-func);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--text-secondary); /* Default text */
+    background-color: transparent;
+}
+#fileList li:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+#fileList li.playing {
+    /* background-color: var(--bg-active-item); Use accent color? */
+    background-color: var(--bg-hover); /* Or just slightly darker */
+    font-weight: 700; /* Bolder */
+    color: var(--text-primary); /* White text */
+}
+
+
+.icon { display: inline-block; width: 1em; height: 1em; stroke-width: 0; stroke: currentColor; fill: currentColor; vertical-align: middle;}
+.hidden { display: none; }
+/* --- CSS Ends --- */
