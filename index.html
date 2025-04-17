@@ -3,65 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reproductor de Música Brillante v2</title>
+    <title>Reproductor de Música Moderno</title>
     <style>
-        /* --- CSS Starts (Estilo "Brillante" - sin cambios respecto a la versión anterior) --- */
+        /* --- Modern Dark Theme CSS Starts --- */
         :root {
-            --bg-color: #fdf6e3; --player-bg: #fffbf0; --accent-orange: #f57c00;
-            --accent-green: #388e3c; --icon-color: #424242; --text-light: #666;
-            --shadow-color-dark: rgba(211, 189, 143, 0.5); --shadow-color-light: rgba(255, 255, 255, 0.8);
-            --border-radius-main: 16px; --border-radius-inner: 10px;
+            /* Color Palette */
+            --bg-main: #1a1d21;         /* Very dark blue/gray */
+            --bg-card: #2a2d31;        /* Dark gray for player/playlist */
+            --bg-card-secondary: #3f434a; /* Slightly lighter gray for elements within cards */
+            --bg-hover: #4a4e55;         /* Hover background */
+            --bg-active: #3b82f6;       /* Active/Playing background (using accent) */
+
+            --text-primary: #e1e1e1;     /* Primary light text */
+            --text-secondary: #a1a1a1;   /* Secondary muted text (time, artist) */
+            --text-accent: #ffffff;      /* Text on accent background */
+            --text-button: #cbd5e1;      /* Default button icon/text color */
+
+            --accent-primary: #3b82f6;  /* Vibrant Blue for sliders, highlights */
+            --accent-secondary: #60a5fa; /* Lighter blue for hover maybe */
+            --accent-play: #4ade80;      /* Green for Play icon */
+            --accent-pause: #facc15;     /* Yellow for Pause icon */
+            --accent-error: #f87171;     /* Red for errors */
+
+            --border-color: #444;        /* Subtle borders/dividers */
+            --shadow-subtle: 0 4px 15px rgba(0, 0, 0, 0.2); /* Optional subtle shadow for cards */
+
+            /* Layout & Style */
+            --border-radius-main: 12px;
+            --border-radius-inner: 8px;
+            --transition-speed: 0.15s;
+            --transition-func: ease;
         }
+
         *, *::before, *::after { box-sizing: border-box; }
+
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--icon-color);
-            display: flex; flex-direction: column; align-items: center; gap: 20px;
+            margin: 0; padding: 20px;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px; /* Increased gap */
+            min-height: 100vh;
         }
-        h1 { color: var(--icon-color); font-weight: 600; }
-        .container { display: flex; flex-wrap: wrap; gap: 25px; width: 100%; max-width: 1000px; justify-content: center; }
-        .player { background-color: var(--player-bg); border-radius: var(--border-radius-main); padding: 25px; box-shadow: 8px 8px 16px var(--shadow-color-dark), -8px -8px 16px var(--shadow-color-light); width: 100%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
-        .playlist-container { background-color: var(--player-bg); border-radius: var(--border-radius-main); padding: 20px; box-shadow: 8px 8px 16px var(--shadow-color-dark), -8px -8px 16px var(--shadow-color-light); width: 100%; max-width: 520px; flex-grow: 1; height: 480px; overflow-y: auto; }
-        #fileInputLabel { display: inline-block; padding: 12px 25px; background-color: var(--player-bg); color: var(--accent-orange); font-weight: 600; border-radius: var(--border-radius-main); cursor: pointer; box-shadow: 5px 5px 10px var(--shadow-color-dark), -5px -5px 10px var(--shadow-color-light); transition: all 0.15s ease-in-out; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
-        #fileInputLabel:hover { color: #ef6c00; box-shadow: 6px 6px 12px var(--shadow-color-dark), -6px -6px 12px var(--shadow-color-light); }
-        #fileInputLabel:active { box-shadow: inset 4px 4px 8px var(--shadow-color-dark), inset -4px -4px 8px var(--shadow-color-light); transform: scale(0.98); }
+
+        h1 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0; /* Reduced margin */
+        }
+
+        /* File Input Button */
+        #fileInputLabel {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--bg-card);
+            color: var(--accent-secondary);
+            font-weight: 500;
+            border-radius: var(--border-radius-inner);
+            cursor: pointer;
+            transition: background-color var(--transition-speed) var(--transition-func), color var(--transition-speed) var(--transition-func);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        #fileInputLabel:hover {
+            background-color: var(--bg-card-secondary);
+            color: var(--text-accent);
+        }
+        #fileInputLabel:active {
+            background-color: var(--bg-hover);
+        }
         #fileInput { display: none; }
-        #albumArtContainer { width: 200px; height: 200px; background-color: #eee; border-radius: var(--border-radius-inner); overflow: hidden; box-shadow: inset 4px 4px 8px var(--shadow-color-dark), inset -4px -4px 8px var(--shadow-color-light); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-        #albumArt { width: 100%; height: 100%; object-fit: cover; display: none; color: #bbb; font-size: 1em; text-align: center; }
-        #artPlaceholder { width: 60px; height: 60px; color: #ccc; display: inline-block; }
-        #trackInfo { text-align: center; }
-        #trackTitle { font-weight: 600; display: block; font-size: 1.2em; margin-bottom: 4px; color: #333;}
-        #trackArtistAlbum { font-size: 0.95em; color: var(--text-light); }
-        .progress-container { width: 100%; display: flex; align-items: center; gap: 10px; }
-        #progressBar { flex-grow: 1; appearance: none; width: 100%; height: 10px; background: transparent; outline: none; cursor: pointer; border-radius: 5px; box-shadow: inset 3px 3px 6px var(--shadow-color-dark), inset -3px -3px 6px var(--shadow-color-light); }
-        #progressBar::-webkit-slider-runnable-track { height: 10px; background: transparent; border-radius: 5px; }
-        #progressBar::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; background: var(--accent-orange); border-radius: 50%; cursor: pointer; margin-top: -4px; box-shadow: 3px 3px 6px var(--shadow-color-dark), -3px -3px 6px var(--shadow-color-light); border: 1px solid rgba(0,0,0,0.1); }
-        #progressBar::-moz-range-track { height: 10px; background: transparent; border-radius: 5px; }
-        #progressBar::-moz-range-thumb { width: 18px; height: 18px; background: var(--accent-orange); border-radius: 50%; border: none; cursor: pointer; box-shadow: 3px 3px 6px var(--shadow-color-dark), -3px -3px 6px var(--shadow-color-light); }
-        .time-display { font-size: 0.85em; white-space: nowrap; color: var(--text-light); font-weight: 500; }
-        .controls { display: flex; align-items: center; justify-content: space-around; gap: 15px; width: 100%; padding: 10px 0; }
-        .control-button { background-color: var(--player-bg); border: none; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--icon-color); box-shadow: 4px 4px 8px var(--shadow-color-dark), -4px -4px 8px var(--shadow-color-light); transition: all 0.1s ease-in-out; }
-        .control-button svg { width: 22px; height: 22px; display: block; fill: currentColor;}
-        .control-button:hover { color: #000; box-shadow: 5px 5px 10px var(--shadow-color-dark), -5px -5px 10px var(--shadow-color-light); }
-        .control-button:active { box-shadow: inset 3px 3px 6px var(--shadow-color-dark), inset -3px -3px 6px var(--shadow-color-light); transform: scale(0.95); color: var(--accent-orange); }
-        #playPauseButton { width: 64px; height: 64px; background-color: var(--player-bg); }
-        #playPauseButton svg { width: 32px; height: 32px; }
-        #playPauseButton .play-icon { color: var(--accent-green); }
-        #playPauseButton .pause-icon { color: var(--accent-orange); }
-        #playPauseButton:active .play-icon, #playPauseButton:active .pause-icon { color: #d84315; }
-        .volume-container { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 150px; margin-top: 5px;}
-        .volume-container svg { width: 18px; height: 18px; color: var(--text-light); }
-        #volumeSlider { appearance: none; width: 100%; height: 6px; background: transparent; border-radius: 3px; outline: none; cursor: pointer; box-shadow: inset 2px 2px 4px var(--shadow-color-dark), inset -2px -2px 4px var(--shadow-color-light); }
-        #volumeSlider::-webkit-slider-runnable-track { height: 6px; background: transparent; border-radius: 3px;}
-        #volumeSlider::-moz-range-track { height: 6px; background: transparent; border-radius: 3px;}
-        #volumeSlider::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; background: var(--icon-color); border-radius: 50%; margin-top: -4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.4);}
-        #volumeSlider::-moz-range-thumb { width: 14px; height: 14px; background: var(--icon-color); border-radius: 50%; border: none; }
-        .playlist-container h3 { margin-top: 5px; margin-bottom: 15px; text-align: center; color: var(--text-light); font-weight: 500; }
+
+
+        /* Main Layout Container */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            width: 100%;
+            max-width: 1000px;
+            justify-content: center;
+        }
+
+        /* Player & Playlist Cards */
+        .player, .playlist-container {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius-main);
+            padding: 25px;
+            box-shadow: var(--shadow-subtle); /* Optional subtle shadow */
+            border: 1px solid var(--border-color); /* Or a simple border */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player {
+            width: 100%;
+            max-width: 380px;
+            align-items: center;
+            gap: 20px; /* Increased gap */
+        }
+
+        .playlist-container {
+            width: 100%;
+            max-width: 520px;
+            flex-grow: 1;
+            height: 480px; /* Keep fixed height for scroll */
+            overflow-y: auto;
+            gap: 15px;
+        }
+
+        /* Album Art */
+        #albumArtContainer {
+            width: 220px; /* Slightly larger */
+            height: 220px;
+            background-color: var(--bg-card-secondary); /* Placeholder bg */
+            border-radius: var(--border-radius-inner);
+            overflow: hidden;
+            border: 1px solid var(--border-color); /* Simple border */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+        #albumArt {
+            width: 100%; height: 100%; object-fit: cover; display: none;
+        }
+        #artPlaceholder {
+            width: 60px; height: 60px; color: var(--text-secondary); display: inline-block;
+        }
+
+        /* Track Info */
+        #trackInfo { text-align: center; width: 100%; }
+        #trackTitle {
+            font-weight: 600; display: block; font-size: 1.15em; margin-bottom: 5px; color: var(--text-primary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; /* Prevent long titles breaking layout */
+        }
+        #trackArtistAlbum {
+            font-size: 0.9em; color: var(--text-secondary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* Progress Bar & Time */
+        .progress-container { width: 100%; display: flex; align-items: center; gap: 12px; }
+        .time-display { font-size: 0.85em; white-space: nowrap; color: var(--text-secondary); font-weight: 500; }
+
+        /* Sliders (Progress & Volume) - Modern Style */
+        input[type="range"] {
+            flex-grow: 1;
+            appearance: none;
+            -webkit-appearance: none; /* Override default look */
+            width: 100%;
+            height: 6px; /* Track height */
+            background: var(--bg-card-secondary); /* Track background */
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            /* Gradient for fill - adjusted dynamically by JS recommended, but CSS only example: */
+             /* background: linear-gradient(to right, var(--accent-primary) 0%, var(--accent-primary) 50%, var(--bg-card-secondary) 50%, var(--bg-card-secondary) 100%); */
+        }
+        /* For JS fill: Set background to track color */
+        #progressBar { background: var(--bg-card-secondary); }
+        #volumeSlider { background: var(--bg-card-secondary); height: 4px; border-radius: 2px;}
+
+        /* Thumb Styles */
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none; -webkit-appearance: none;
+            width: 14px; height: 14px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none; /* No border */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3); /* Subtle shadow */
+             margin-top: -4px; /* Adjust vertical alignment */
+        }
+         input[type="range"]::-moz-range-thumb {
+             width: 14px; height: 14px;
+             background: var(--accent-primary);
+             border-radius: 50%;
+             cursor: pointer;
+             border: none;
+             box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+         }
+         #volumeSlider::-webkit-slider-thumb { width: 12px; height: 12px; margin-top: -4px; }
+         #volumeSlider::-moz-range-thumb { width: 12px; height: 12px; }
+
+
+        /* Playback Controls */
+        .controls {
+            display: flex; align-items: center; justify-content: center; /* Center controls */
+            gap: 20px; /* More space */
+            width: 100%;
+            padding: 10px 0;
+        }
+        .control-button {
+            background-color: transparent; /* Flat */
+            border: none;
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: var(--text-button); /* Default icon color */
+            transition: background-color var(--transition-speed) var(--transition-func), color var(--transition-speed) var(--transition-func);
+        }
+        .control-button svg { width: 22px; height: 22px; display: block; fill: currentColor; }
+        .control-button:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-accent); /* White icon on hover */
+        }
+        .control-button:active {
+             background-color: var(--bg-card-secondary); /* Slightly different active bg */
+             /* transform: scale(0.97); */ /* Removed scale for flatter feel */
+        }
+
+        /* Play/Pause Button Specifics */
+        #playPauseButton {
+            width: 60px; height: 60px;
+            background-color: var(--bg-card-secondary); /* Slight background */
+            color: var(--text-primary);
+        }
+        #playPauseButton svg { width: 30px; height: 30px; }
+        #playPauseButton .play-icon { color: var(--accent-play); }
+        #playPauseButton .pause-icon { color: var(--accent-pause); }
+
+        #playPauseButton:hover {
+            background-color: var(--bg-hover);
+        }
+        #playPauseButton:active {
+             background-color: var(--bg-card-secondary);
+        }
+        #playPauseButton:active .play-icon,
+        #playPauseButton:active .pause-icon { color: var(--accent-primary); } /* Use primary accent on active click */
+
+
+        /* Volume Control Area */
+        .volume-container {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; max-width: 180px; /* Wider volume control */
+            margin-top: 5px;
+        }
+        .volume-container svg {
+            width: 18px; height: 18px; color: var(--text-secondary); flex-shrink: 0;
+        }
+
+
+        /* Playlist Styling */
+        .playlist-container h3 {
+            margin-top: 0; /* Remove top margin */
+            margin-bottom: 10px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1em;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
         #fileList { list-style: none; padding: 0; margin: 0; }
-        #fileList li { padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; font-size: 0.95em; border-radius: 6px; margin-bottom: 5px; transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-light); background-color: var(--player-bg); box-shadow: 3px 3px 6px var(--shadow-color-dark), -3px -3px 6px var(--shadow-color-light); }
-        #fileList li:hover { background-color: #f9f0d5; color: var(--icon-color); }
-        #fileList li.playing { background-color: #ffe8cc; font-weight: 600; color: #c06000; box-shadow: inset 3px 3px 6px var(--shadow-color-dark), inset -3px -3px 6px var(--shadow-color-light); }
-        #fileList li:last-child { border-bottom: none; }
+        #fileList li {
+            padding: 10px 15px;
+            border: none; /* Remove border */
+            cursor: pointer;
+            font-size: 0.95em;
+            border-radius: var(--border-radius-inner);
+            margin-bottom: 6px;
+            transition: background-color var(--transition-speed) var(--transition-func), color var(--transition-speed) var(--transition-func);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            color: var(--text-secondary); /* Default text color */
+            background-color: transparent; /* Flat */
+        }
+        #fileList li:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        #fileList li.playing {
+            background-color: var(--bg-active); /* Use accent bg */
+            font-weight: 600;
+            color: var(--text-accent); /* White text */
+        }
+        #fileList li:last-child { margin-bottom: 0; } /* Remove margin on last item */
+
+
         .icon { display: inline-block; width: 1em; height: 1em; stroke-width: 0; stroke: currentColor; fill: currentColor; vertical-align: middle;}
         .hidden { display: none; }
         /* --- CSS Ends --- */
@@ -69,7 +293,7 @@
 </head>
 <body>
 
-    <h1>Reproductor Brillante v2</h1>
+    <h1>Reproductor Moderno</h1>
 
     <label for="fileInput" id="fileInputLabel">Seleccionar Archivos (MP3, M4A, MP4)</label>
     <input type="file" id="fileInput" multiple accept=".mp3,.mp4,.m4a">
@@ -77,30 +301,30 @@
     <div class="container">
         <div class="player">
              <div id="albumArtContainer">
-                 <svg class="icon" id="artPlaceholder" style="width: 60px; height: 60px; color: #ccc;" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 15.5h-1.5V14h-1v3H8v-3H7v4.5H5.5v-5c0-.55.45-1 1-1H11c.55 0 1 .45 1 1v5H9.5v-1.5h-1V17H12v1.5zm4.5-4.5c0-.55-.45-1-1-1h-2v1.5h1.5v1h-1.5V17h2c.55 0 1-.45 1-1v-4zm0-2.5h-4V9h4v1.5z"/></svg>
-                <img id="albumArt" src="" alt="">
-            </div>
-            <div id="trackInfo">
-                <span id="trackTitle">Selecciona archivos...</span>
-                <span id="trackArtistAlbum"></span>
-            </div>
-             <div class="progress-container">
-                 <span id="currentTime" class="time-display">0:00</span>
-                 <input type="range" id="progressBar" value="0" min="0" max="100" step="0.1">
-                 <span id="duration" class="time-display">0:00</span>
+                 <svg class="icon" id="artPlaceholder" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 15.5h-1.5V14h-1v3H8v-3H7v4.5H5.5v-5c0-.55.45-1 1-1H11c.55 0 1 .45 1 1v5H9.5v-1.5h-1V17H12v1.5zm4.5-4.5c0-.55-.45-1-1-1h-2v1.5h1.5v1h-1.5V17h2c.55 0 1-.45 1-1v-4zm0-2.5h-4V9h4v1.5z"/></svg>
+                 <img id="albumArt" src="" alt="Album Art">
              </div>
-             <div class="controls">
-                  <button class="control-button" id="prevButton" title="Anterior"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6h3.5v12H6zm5 6 8.5 6V6l-8.5 6z"/></svg></button>
-                  <button class="control-button" id="playPauseButton" title="Reproducir/Pausa">
+             <div id="trackInfo">
+                 <span id="trackTitle">Selecciona archivos...</span>
+                 <span id="trackArtistAlbum"></span>
+             </div>
+              <div class="progress-container">
+                  <span id="currentTime" class="time-display">0:00</span>
+                  <input type="range" id="progressBar" value="0" min="0" max="100" step="0.1">
+                  <span id="duration" class="time-display">0:00</span>
+              </div>
+              <div class="controls">
+                   <button class="control-button" id="prevButton" title="Anterior"><svg class="icon" viewBox="0 0 24 24"><path d="M6 6h3.5v12H6zm5 6 8.5 6V6l-8.5 6z"/></svg></button>
+                   <button class="control-button" id="playPauseButton" title="Reproducir/Pausa">
                        <svg class="icon play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
                        <svg class="icon pause-icon hidden" viewBox="0 0 24 24"><path d="M6 19h5V5H6v14zm7-14v14h5V5h-5z"/></svg>
-                  </button>
-                  <button class="control-button" id="nextButton" title="Siguiente"><svg class="icon" viewBox="0 0 24 24"><path d="M14.5 18l8.5-6-8.5-6v12zm-10 0h3.5V6H4.5v12z"/></svg></button>
-             </div>
-              <div class="volume-container">
-                  <svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-.9-3.29-2.24-4.03v8.05c1.34-.74 2.24-2.26 2.24-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                  <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+                   </button>
+                   <button class="control-button" id="nextButton" title="Siguiente"><svg class="icon" viewBox="0 0 24 24"><path d="M14.5 18l8.5-6-8.5-6v12zm-10 0h3.5V6H4.5v12z"/></svg></button>
               </div>
+               <div class="volume-container">
+                   <svg class="icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-.9-3.29-2.24-4.03v8.05c1.34-.74 2.24-2.26 2.24-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                   <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+               </div>
         </div>
         <div class="playlist-container">
             <h3>Lista de Reproducción</h3>
@@ -112,230 +336,296 @@
     <video id="videoPlayer" style="display: none;"></video>
 
     <script>
-        // --- JavaScript Starts ---
+        // --- JavaScript (No changes needed from your provided version) ---
+        // (Paste the exact same JavaScript code from your v2 here)
         window.addEventListener('load', () => {
             console.log("App loaded. Setting up elements...");
-            // --- Element References --- (Identical to previous version)
-            const fileInput=document.getElementById('fileInput'),fileListDisplay=document.getElementById('fileList'),audioPlayer=document.getElementById('audioPlayer'),videoPlayer=document.getElementById('videoPlayer'),playPauseButton=document.getElementById('playPauseButton'),prevButton=document.getElementById('prevButton'),nextButton=document.getElementById('nextButton'),progressBar=document.getElementById('progressBar'),currentTimeDisplay=document.getElementById('currentTime'),durationDisplay=document.getElementById('duration'),volumeSlider=document.getElementById('volumeSlider'),albumArtImg=document.getElementById('albumArt'),albumArtContainer=document.getElementById('albumArtContainer'),artPlaceholder=document.getElementById('artPlaceholder'),trackTitle=document.getElementById('trackTitle'),trackArtistAlbum=document.getElementById('trackArtistAlbum'),playIcon=playPauseButton.querySelector('.play-icon'),pauseIcon=playPauseButton.querySelector('.pause-icon');
+            const fileInput = document.getElementById('fileInput'),
+                  fileListDisplay = document.getElementById('fileList'),
+                  audioPlayer = document.getElementById('audioPlayer'),
+                  videoPlayer = document.getElementById('videoPlayer'),
+                  playPauseButton = document.getElementById('playPauseButton'),
+                  prevButton = document.getElementById('prevButton'),
+                  nextButton = document.getElementById('nextButton'),
+                  progressBar = document.getElementById('progressBar'),
+                  currentTimeDisplay = document.getElementById('currentTime'),
+                  durationDisplay = document.getElementById('duration'),
+                  volumeSlider = document.getElementById('volumeSlider'),
+                  albumArtImg = document.getElementById('albumArt'),
+                  albumArtContainer = document.getElementById('albumArtContainer'),
+                  artPlaceholder = document.getElementById('artPlaceholder'),
+                  trackTitle = document.getElementById('trackTitle'),
+                  trackArtistAlbum = document.getElementById('trackArtistAlbum'),
+                  playIcon = playPauseButton.querySelector('.play-icon'),
+                  pauseIcon = playPauseButton.querySelector('.pause-icon');
 
-            // --- State Variables --- (Identical)
-            let trackList=[],currentTrackIndex=-1,isPlaying=false,currentAudioSource=audioPlayer,currentObjectURL=null;
+            let trackList = [],
+                currentTrackIndex = -1,
+                isPlaying = false,
+                currentAudioSource = audioPlayer,
+                currentObjectURL = null;
 
-            // --- jsmediatags Check (Keep check, but library is commented out) ---
-            const jsmediatags = window.jsmediatags; // Will be undefined if script tag is commented out
-            if(!jsmediatags){console.warn("jsmediatags library not loaded (expected if commented out). Metadata disabled.");}else{console.log("jsmediatags library loaded.");}
+            const jsmediatags = window.jsmediatags;
+            if (!jsmediatags) { console.warn("jsmediatags library not loaded. Metadata disabled."); }
+            else { console.log("jsmediatags library loaded."); }
 
-             // --- Initial UI State --- (Identical)
-             albumArtImg.style.display = 'none'; artPlaceholder.style.display = 'inline-block';
+            albumArtImg.style.display = 'none'; artPlaceholder.style.display = 'inline-block';
 
-            // --- Event Listeners --- (Mostly Identical, ensure error listener exists)
-             console.log("Adding event listeners...");
-             fileInput.addEventListener('change', handleFileSelection);
-             playPauseButton.addEventListener('click', togglePlayPause); // Critical listener
-             prevButton.addEventListener('click', playPreviousTrack);
-             nextButton.addEventListener('click', playNextTrack);
-             progressBar.addEventListener('input', handleSeek);
-             volumeSlider.addEventListener('input', handleVolumeChange);
-             [audioPlayer, videoPlayer].forEach(player => {
-                 player.addEventListener('timeupdate', updateProgress);
-                 player.addEventListener('loadedmetadata', () => { console.log(`${player.id} metadata loaded`); updateDuration(); });
-                 player.addEventListener('ended', playNextTrack); // Play next on end
-                 player.addEventListener('error', (e) => handleError(e, player.id)); // Ensure error handling is attached
-                 player.addEventListener('playing', () => { console.log(`${player.id} 'playing' event fired.`); isPlaying = true; updatePlayPauseButton(); }); // Update state on playing
-                 player.addEventListener('pause', () => { console.log(`${player.id} 'pause' event fired.`); isPlaying = false; updatePlayPauseButton(); }); // Update state on pause
-                 // Remove 'canplay' listener for now as we trigger play manually
-             });
-             console.log("Event listeners added.");
+            console.log("Adding event listeners...");
+            fileInput.addEventListener('change', handleFileSelection);
+            playPauseButton.addEventListener('click', togglePlayPause);
+            prevButton.addEventListener('click', playPreviousTrack);
+            nextButton.addEventListener('click', playNextTrack);
+            progressBar.addEventListener('input', handleSeek);
+            progressBar.addEventListener('input', updateSliderFill); // Update fill on drag
+            volumeSlider.addEventListener('input', handleVolumeChange);
+            volumeSlider.addEventListener('input', updateSliderFill); // Update fill on drag
 
+            [audioPlayer, videoPlayer].forEach(player => {
+                player.addEventListener('timeupdate', updateProgress);
+                player.addEventListener('loadedmetadata', () => {
+                    console.log(`${player.id} metadata loaded`);
+                    updateDuration();
+                    updateSliderFill({ target: progressBar }); // Initial fill after load
+                });
+                player.addEventListener('ended', playNextTrack);
+                player.addEventListener('error', (e) => handleError(e, player.id));
+                player.addEventListener('playing', () => {
+                    console.log(`${player.id} 'playing' event fired.`);
+                    isPlaying = true; updatePlayPauseButton();
+                });
+                player.addEventListener('pause', () => {
+                    console.log(`${player.id} 'pause' event fired.`);
+                    isPlaying = false; updatePlayPauseButton();
+                });
+            });
+            console.log("Event listeners added.");
 
-            // --- File Handling ---
-            function handleFileSelection(event){
-                console.log("handleFileSelection triggered."); const files=event.target.files;
-                console.log(`Files selected: ${files.length}`,files); if(files.length===0){console.log("No files selected.");return;}
-                trackList=Array.from(files); renderFileList();
-                if(trackList.length>0){
+            // --- Initial Slider Fill ---
+            updateSliderFill({ target: volumeSlider }); // Set initial volume fill
+
+            function handleFileSelection(event) {
+                console.log("handleFileSelection triggered."); const files = event.target.files;
+                console.log(`Files selected: ${files.length}`, files); if (files.length === 0) { console.log("No files selected."); return; }
+                trackList = Array.from(files); renderFileList();
+                if (trackList.length > 0) {
                     console.log("Loading track 0, but NOT auto-playing.");
-                    // Load the first track's info and prepare it, but don't play
-                    loadTrack(0, false); // Pass false to indicate no autoplay
+                    loadTrack(0, false);
                 }
             }
-            function renderFileList(){
-                console.log("Rendering file list..."); fileListDisplay.innerHTML='';
-                trackList.forEach((file,index)=>{ const li=document.createElement('li');li.textContent=file.name;li.dataset.index=index;
-                li.addEventListener('click',()=>{console.log(`Playlist item clicked: Index ${index}`); loadTrack(index, true); }); // Load and PLAY on click
-                fileListDisplay.appendChild(li); }); console.log("File list rendered.");
+            function renderFileList() {
+                console.log("Rendering file list..."); fileListDisplay.innerHTML = '';
+                trackList.forEach((file, index) => {
+                    const li = document.createElement('li'); li.textContent = file.name; li.dataset.index = index;
+                    li.addEventListener('click', () => { console.log(`Playlist item clicked: Index ${index}`); loadTrack(index, true); });
+                    fileListDisplay.appendChild(li);
+                }); console.log("File list rendered.");
             }
 
-            // --- NEW Load Track Function (Separated from Play) ---
             function loadTrack(index, autoPlayOnClick = false) {
                 console.log(`loadTrack called with index: ${index}, autoPlay: ${autoPlayOnClick}`);
                 if (index < 0 || index >= trackList.length) { console.warn(`Invalid track index: ${index}`); return; }
 
-                // Revoke previous URL
                 if (currentObjectURL) { console.log("Revoking previous Object URL:", currentObjectURL); URL.revokeObjectURL(currentObjectURL); currentObjectURL = null; }
 
-                // Stop current playback before loading new track
                 if (currentAudioSource) {
                     currentAudioSource.pause();
-                    currentAudioSource.removeAttribute('src'); // Fully remove src
-                    currentAudioSource.load(); // Reset element state
-                     console.log(`Paused and reset ${currentAudioSource.id}`);
+                    currentAudioSource.removeAttribute('src');
+                    currentAudioSource.load();
+                    console.log(`Paused and reset ${currentAudioSource.id}`);
                 }
-
 
                 currentTrackIndex = index;
                 const file = trackList[currentTrackIndex];
                 console.log(`Loading file: ${file.name}, Type: ${file.type || 'N/A'}`);
 
-                // Update UI immediately
                 trackTitle.textContent = `Cargando: ${file.name}...`; trackArtistAlbum.textContent = "";
                 albumArtImg.style.display = 'none'; artPlaceholder.style.display = 'inline-block';
                 isPlaying = false; updatePlayPauseButton(); updatePlayingListItem(); progressBar.value = 0;
                 currentTimeDisplay.textContent = formatTime(0); durationDisplay.textContent = formatTime(0);
+                 updateSliderFill({ target: progressBar }); // Reset progress bar fill
 
                 try {
                     currentObjectURL = URL.createObjectURL(file);
                     console.log("Created Object URL:", currentObjectURL);
                 } catch (e) { console.error("Error creating Object URL:", e); handleError(e, 'createObjectURL'); return; }
 
-                // Determine player
                 const fileNameLower = file.name.toLowerCase();
-                 if (fileNameLower.endsWith('.mp4')) {
-                     console.log("Selecting videoPlayer for MP4."); currentAudioSource = videoPlayer;
-                 } else {
-                     console.log("Selecting audioPlayer."); currentAudioSource = audioPlayer;
-                 }
+                if (fileNameLower.endsWith('.mp4')) {
+                    console.log("Selecting videoPlayer for MP4."); currentAudioSource = videoPlayer;
+                } else {
+                    console.log("Selecting audioPlayer."); currentAudioSource = audioPlayer;
+                }
 
                 console.log(`Setting src for ${currentAudioSource.id}: ${currentObjectURL}`);
                 currentAudioSource.src = currentObjectURL;
-                // Explicitly call load() after setting src might help consistency
                 currentAudioSource.load();
                 console.log(`Src set for ${currentAudioSource.id}. Element will load.`);
 
-                 // Load metadata as soon as possible after setting src
-                 loadMetadata(file);
+                loadMetadata(file);
 
-                // --- IMPORTANT: Only play if triggered by list click ---
                 if (autoPlayOnClick) {
                     console.log("Auto-playing track due to list click.");
-                    // We still might want to wait for 'canplay' before playing here
-                    // to avoid issues if metadata/loading is slow. Let's re-add it just for this autoPlay.
                     const playWhenReadyOnClick = () => {
                         console.log(`'canplay' triggered for autoPlay. Attempting play.`);
-                         currentAudioSource.play().catch(e => {
-                             console.error("Error auto-playing track:", e);
-                             handleError(e, `${currentAudioSource.id} (autoPlay promise)`);
-                         });
-                         currentAudioSource.removeEventListener('canplay', playWhenReadyOnClick);
-                         currentAudioSource.removeEventListener('error', errorBeforeReadyOnClick); // Clean up error listener too
+                        currentAudioSource.play().catch(e => {
+                            console.error("Error auto-playing track:", e);
+                            handleError(e, `${currentAudioSource.id} (autoPlay promise)`);
+                        });
+                        // No need to remove listener if using {once: true}
                     };
                      const errorBeforeReadyOnClick = (e) => {
                          console.error(`Error on ${currentAudioSource.id} before autoPlay 'canplay':`, e);
                          handleError(e, `${currentAudioSource.id} (loading for autoPlay)`);
-                          currentAudioSource.removeEventListener('canplay', playWhenReadyOnClick);
-                         currentAudioSource.removeEventListener('error', errorBeforeReadyOnClick);
+                           // No need to remove listener if using {once: true}
                      };
 
-                     currentAudioSource.addEventListener('canplay', playWhenReadyOnClick, { once: true });
+                    currentAudioSource.addEventListener('canplay', playWhenReadyOnClick, { once: true });
                      currentAudioSource.addEventListener('error', errorBeforeReadyOnClick, { once: true });
-
                 } else {
                     console.log("Track loaded, waiting for user interaction (Play button).");
-                     // Ensure UI reflects that it's paused but ready
-                     isPlaying = false;
-                     updatePlayPauseButton();
+                    isPlaying = false;
+                    updatePlayPauseButton();
                 }
             }
 
+            function togglePlayPause() {
+                console.log("togglePlayPause called. isPlaying:", isPlaying);
+                if (!currentAudioSource || !currentAudioSource.src || currentAudioSource.src === window.location.href || currentTrackIndex < 0) {
+                    console.log("No track loaded/ready to play/pause.");
+                    return;
+                }
 
-            // --- Playback Controls --- (Modified toggle, next, prev)
-             function togglePlayPause(){
-                 console.log("togglePlayPause called. isPlaying:", isPlaying);
-                 // Check if a source is loaded and ready (or loading)
-                 if (!currentAudioSource || !currentAudioSource.src || currentAudioSource.src === window.location.href || currentTrackIndex < 0) {
-                      console.log("No track loaded/ready to play/pause.");
-                      // Optional: try loading first track if none selected?
-                      // if (trackList.length > 0 && currentTrackIndex < 0) { loadTrack(0, true); }
-                      return;
-                  }
+                if (isPlaying) {
+                    console.log("Pausing...");
+                    currentAudioSource.pause();
+                } else {
+                    console.log("Attempting play via button...");
+                    currentAudioSource.play().catch(e => {
+                        console.error("Error playing via button:", e);
+                        handleError(e, `${currentAudioSource.id} (play button promise)`);
+                        isPlaying = false; updatePlayPauseButton();
+                    });
+                }
+            }
 
-                 if (isPlaying) {
-                     console.log("Pausing...");
-                     currentAudioSource.pause(); // isPlaying state updated by 'pause' event listener
-                 } else {
-                     console.log("Attempting play via button...");
-                     currentAudioSource.play().catch(e => {
-                         console.error("Error playing via button:", e);
-                         handleError(e, `${currentAudioSource.id} (play button promise)`);
-                         // Ensure state reflects failure
-                          isPlaying = false; updatePlayPauseButton();
-                     });
-                     // isPlaying state updated by 'playing' event listener
-                 }
-                 // Note: isPlaying state is now primarily managed by 'playing' and 'pause' event listeners for accuracy
-             }
-
-             function playNextTrack(){
+             function playNextTrack() {
                  if (trackList.length === 0) return; let nextIndex = currentTrackIndex + 1;
-                 if (nextIndex >= trackList.length) { nextIndex = 0; }
+                 if (nextIndex >= trackList.length) { nextIndex = 0; } // Loop back to start
                  console.log("playNextTrack -> calling loadTrack with index:", nextIndex);
-                 loadTrack(nextIndex, true); // Load and auto-play next
+                 loadTrack(nextIndex, true);
              }
-             function playPreviousTrack(){
+
+             function playPreviousTrack() {
                  if (trackList.length === 0) return;
-                 if (currentAudioSource.currentTime > 3) {
+                 const wasPlaying = isPlaying; // Store state before potential seek
+
+                 if (currentAudioSource && currentAudioSource.currentTime > 3) {
                      console.log("playPreviousTrack -> restarting current track");
                      currentAudioSource.currentTime = 0;
-                     // Ensure playback continues if it was playing
-                     if(wasPlayingBeforeRestart) { // Need to track this state if restart pause is undesired
-                        currentAudioSource.play().catch(e => handleError(e, 'restart'));
-                     }
-                 } else {
-                     let prevIndex = currentTrackIndex - 1; if (prevIndex < 0) { prevIndex = trackList.length - 1; }
-                     console.log("playPreviousTrack -> calling loadTrack with index:", prevIndex);
-                     loadTrack(prevIndex, true); // Load and auto-play previous
-                 }
-                 // We need a variable to track if restarting should resume play
-                 // Let's simplify: restart always goes to beginning, paused. User hits play.
-                 // OR better: check isPlaying state before seeking
-                 const wasPlayingBeforeRestart = isPlaying;
-                 if (currentAudioSource.currentTime > 3) {
-                     console.log("playPreviousTrack -> restarting current track");
-                     currentAudioSource.currentTime = 0;
-                     if(!wasPlayingBeforeRestart) { // If it wasn't playing, pause it after seeking
+                     updateSliderFill({ target: progressBar }); // Update fill after seek
+                     if (!wasPlaying) { // If paused, keep it paused after seek
                          currentAudioSource.pause();
                          isPlaying = false;
                          updatePlayPauseButton();
                      } else {
-                         // If it WAS playing, it should automatically resume or the 'playing' event will fire.
-                         // Ensure the play button state reflects playing if it resumes quickly.
-                         updatePlayPauseButton(); // Update button just in case
+                         // If it was playing, the 'playing' event should handle the state,
+                         // but ensure the button reflects playing immediately if needed.
+                         updatePlayPauseButton();
                      }
-
-                 } else { /* ... load prev track ... */ }
+                 } else {
+                     let prevIndex = currentTrackIndex - 1;
+                     if (prevIndex < 0) { prevIndex = trackList.length - 1; } // Loop to end
+                     console.log("playPreviousTrack -> calling loadTrack with index:", prevIndex);
+                     loadTrack(prevIndex, true);
+                 }
              }
 
 
-            // --- UI Updates --- (Identical)
-            function updatePlayPauseButton(){playIcon.classList.toggle('hidden',isPlaying);pauseIcon.classList.toggle('hidden',!isPlaying);playPauseButton.title=isPlaying?"Pausa":"Reproducir";}
-            function updateProgress(){if(!currentAudioSource||!isFinite(currentAudioSource.duration))return;const currentTime=currentAudioSource.currentTime;progressBar.value=currentTime;currentTimeDisplay.textContent=formatTime(currentTime);}
-            function updateDuration(){if(!currentAudioSource||!isFinite(currentAudioSource.duration)){durationDisplay.textContent="0:00";progressBar.max=0;return;} const duration=currentAudioSource.duration;durationDisplay.textContent=formatTime(duration);progressBar.max=duration;}
-            function updatePlayingListItem(){fileListDisplay.querySelectorAll('li').forEach(li=>{li.classList.remove('playing');});const currentLi=fileListDisplay.querySelector(`li[data-index="${currentTrackIndex}"]`);if(currentLi){currentLi.classList.add('playing');currentLi.scrollIntoView({behavior:'smooth',block:'nearest'});}}
+            function updatePlayPauseButton() { playIcon.classList.toggle('hidden', isPlaying); pauseIcon.classList.toggle('hidden', !isPlaying); playPauseButton.title = isPlaying ? "Pausa" : "Reproducir"; }
+            function updateProgress() { if (!currentAudioSource || !isFinite(currentAudioSource.duration)) return; const currentTime = currentAudioSource.currentTime; progressBar.value = currentTime; currentTimeDisplay.textContent = formatTime(currentTime); updateSliderFill({target: progressBar}); } // Update fill during progress
+            function updateDuration() { if (!currentAudioSource || !isFinite(currentAudioSource.duration)) { durationDisplay.textContent = "0:00"; progressBar.max = 0; return; } const duration = currentAudioSource.duration; durationDisplay.textContent = formatTime(duration); progressBar.max = duration; }
+            function updatePlayingListItem() { fileListDisplay.querySelectorAll('li').forEach(li => { li.classList.remove('playing'); }); const currentLi = fileListDisplay.querySelector(`li[data-index="${currentTrackIndex}"]`); if (currentLi) { currentLi.classList.add('playing'); currentLi.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }
 
-            // --- Seek & Volume --- (Identical)
-            function handleSeek(){if(!currentAudioSource||!isFinite(currentAudioSource.duration))return;currentAudioSource.currentTime=progressBar.value;}
-            function handleVolumeChange(){if(!currentAudioSource)return;currentAudioSource.volume=volumeSlider.value;}
+            function handleSeek() { if (!currentAudioSource || !isFinite(currentAudioSource.duration)) return; currentAudioSource.currentTime = progressBar.value; updateSliderFill({ target: progressBar });} // Update fill on manual seek
+            function handleVolumeChange() { if (!currentAudioSource) return; currentAudioSource.volume = volumeSlider.value; updateSliderFill({ target: volumeSlider }); }
 
-            // --- Metadata Handling --- (Identical, ensure jsmediatags check inside)
-             function loadMetadata(file){ console.log(`Attempting metadata for: ${file.name}`); albumArtImg.style.display='none';artPlaceholder.style.display='inline-block'; if(!jsmediatags){console.warn("jsmediatags not loaded.");albumArtImg.alt='Sin carátula'; return;} jsmediatags.read(file,{onSuccess:function(tag){console.log("Metadata loaded:",tag.tags);const t=tag.tags;trackTitle.textContent=t.title||file.name;trackArtistAlbum.textContent=[t.artist,t.album].filter(Boolean).join(' - '); if(t.picture){const{data:d,format:f}=t.picture;let b="";for(let i=0;i<d.length;i++){b+=String.fromCharCode(d[i]);} const dataUrl=`data:${f};base64,${window.btoa(b)}`; albumArtImg.src=dataUrl;albumArtImg.alt=t.album||'Album Art';albumArtImg.style.display='block';artPlaceholder.style.display='none';} else{albumArtImg.src='';albumArtImg.alt='Sin carátula';albumArtImg.style.display='none';artPlaceholder.style.display='inline-block';}},onError:function(error){console.log(`Metadata error:`,error.type,error.info);/* Reset UI */ trackTitle.textContent=file.name;trackArtistAlbum.textContent="(sin metadatos)";albumArtImg.src='';albumArtImg.alt='Sin carátula';albumArtImg.style.display='none';artPlaceholder.style.display='inline-block';}}); }
+             // --- NEW: Function to update slider fill ---
+             function updateSliderFill(event) {
+                 const slider = event.target;
+                 const min = slider.min || 0;
+                 const max = slider.max || 100;
+                 const value = slider.value;
+                 const percentage = ((value - min) / (max - min)) * 100;
+                 // Apply gradient background dynamically
+                 slider.style.background = `linear-gradient(to right, var(--accent-primary) 0%, var(--accent-primary) ${percentage}%, var(--bg-card-secondary) ${percentage}%, var(--bg-card-secondary) 100%)`;
+             }
 
-            // --- Utility Functions --- (Identical)
-             function formatTime(seconds){const secs=Math.floor(seconds||0);const minutes=Math.floor(secs/60);const remainingSeconds=secs%60;return`${minutes}:${remainingSeconds<10?'0':''}${remainingSeconds}`;}
-             function handleError(e,sourceId){console.error(`---- Playback Error from ${sourceId} ----`);console.error("Error Event:",e);let errorDetails="desconocido";if(currentAudioSource&&currentAudioSource.error){console.error("MediaError Code:",currentAudioSource.error.code);console.error("MediaError Message:",currentAudioSource.error.message);errorDetails=`Código: ${currentAudioSource.error.code}`;} trackTitle.textContent="Error de Reproducción";trackArtistAlbum.textContent=trackList[currentTrackIndex]?.name||"Archivo desconocido";albumArtImg.src='';albumArtImg.alt='Error';albumArtImg.style.display='none';artPlaceholder.style.display='inline-block';isPlaying=false;updatePlayPauseButton();if(currentAudioSource)currentAudioSource.src='';alert(`Error al reproducir el archivo (${errorDetails}). Revisa la consola (F12).`);}
+             function loadMetadata(file) {
+                 console.log(`Attempting metadata for: ${file.name}`);
+                 albumArtImg.style.display = 'none'; artPlaceholder.style.display = 'inline-block';
+                 trackTitle.textContent = file.name; // Default title
+                 trackArtistAlbum.textContent = ""; // Clear previous
+
+                 if (!jsmediatags) {
+                     console.warn("jsmediatags not loaded.");
+                     albumArtImg.alt = 'Sin carátula';
+                     return;
+                 }
+                 jsmediatags.read(file, {
+                     onSuccess: function (tag) {
+                         console.log("Metadata loaded:", tag.tags);
+                         const t = tag.tags;
+                         trackTitle.textContent = t.title || file.name; // Use filename if no title
+                         trackArtistAlbum.textContent = [t.artist, t.album].filter(Boolean).join(' - ');
+                         if (t.picture) {
+                             const { data: d, format: f } = t.picture;
+                             let base64String = "";
+                             for (let i = 0; i < d.length; i++) {
+                                 base64String += String.fromCharCode(d[i]);
+                             }
+                             const dataUrl = `data:${f};base64,${window.btoa(base64String)}`;
+                             albumArtImg.src = dataUrl;
+                             albumArtImg.alt = t.album || 'Album Art';
+                             albumArtImg.style.display = 'block'; artPlaceholder.style.display = 'none';
+                         } else {
+                             albumArtImg.src = ''; albumArtImg.alt = 'Sin carátula';
+                             albumArtImg.style.display = 'none'; artPlaceholder.style.display = 'inline-block';
+                         }
+                     },
+                     onError: function (error) {
+                         console.log(`Metadata error:`, error.type, error.info);
+                         // Keep filename as title, clear other fields
+                         trackTitle.textContent = file.name;
+                         trackArtistAlbum.textContent = "(sin metadatos)";
+                         albumArtImg.src = ''; albumArtImg.alt = 'Sin carátula';
+                         albumArtImg.style.display = 'none'; artPlaceholder.style.display = 'inline-block';
+                     }
+                 });
+             }
+
+
+            function formatTime(seconds) { const secs = Math.floor(seconds || 0); const minutes = Math.floor(secs / 60); const remainingSeconds = secs % 60; return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`; }
+             function handleError(e, sourceId) {
+                 console.error(`---- Playback Error from ${sourceId} ----`); console.error("Error Event:", e);
+                 let errorDetails = "desconocido";
+                 if (currentAudioSource && currentAudioSource.error) {
+                     console.error("MediaError Code:", currentAudioSource.error.code);
+                     console.error("MediaError Message:", currentAudioSource.error.message);
+                     errorDetails = `Código: ${currentAudioSource.error.code}`;
+                 }
+                 trackTitle.textContent = "Error de Reproducción"; trackArtistAlbum.textContent = trackList[currentTrackIndex]?.name || "Archivo desconocido";
+                 albumArtImg.src = ''; albumArtImg.alt = 'Error';
+                 albumArtImg.style.display = 'none'; artPlaceholder.style.display = 'inline-block';
+                 isPlaying = false; updatePlayPauseButton();
+                 // Avoid clearing src on error to potentially allow retry? Or clear it:
+                 // if (currentAudioSource) currentAudioSource.src = '';
+                 alert(`Error al reproducir el archivo (${errorDetails}). Revisa la consola (F12).`);
+             }
 
             console.log("Initial setup complete. Ready for file selection.");
         }); // End of window.load listener
-        // --- JavaScript Ends ---
     </script>
+
 </body>
 </html>
